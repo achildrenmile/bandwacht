@@ -1,0 +1,423 @@
+Implement the following plan:
+
+# Plan: Add Login with Fixed Credentials
+
+## Context
+
+The BandWacht web UI is currently completely open — no authentication. Add a single fixed login (username `oe8yml`, random hard password) to protect the tool. No user DB table needed — credentials checked against bcrypt hash, JWT token issued on login.
+
+## Password
+
+`Kx8$mQ2vL#nR7wYp`
+
+## Changes
+
+### 1. `web/backend/requirements.txt` — add auth packages
+
+```
+passlib[bcrypt]>=1.7.4
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.9
+```
+
+### 2. `web/backend/config.py` — add auth settings
+
+```python
+auth_username: str = "oe8yml"
+auth_password_hash: str = "<bcrypt hash>"
+auth_jwt_secret: str = "<random hex>"
+auth_jwt_expire_hours: int = 24
+```
+
+### 3. `web/backend/auth.py` — **new** JWT + bcrypt utilities
+
+- `verify_password(plain, hashed)` — bcrypt verify
+- `create_access_token(subject)` — sign JWT with expiry
+- `get_current_user` — FastAPI `Depends()` that validates `Authorization: Bearer` header, raises 401 on failure
+
+### 4. `web/backend/routers/auth.py` — **new** login endpoint
+
+- `POST /auth/login` — accepts `OAuth2PasswordRequestForm`, checks username + bcrypt hash, returns `{"access_token": "...", "token_type": "bearer"}`
+
+### 5. `web/backend/main.py` — wire auth
+
+- Mount auth router (public)
+- Add `get_current_user` dependency to all protected routers (instances, targets, events, recordings, notifications, settings)
+- Protect WebSocket endpoints: extract token from `?token=` query param
+
+### 6. `web/frontend/src/api/client.ts` — auth header + 401 handling
+
+- Add `getToken()` / `setToken()` / `clearToken()` using localStorage
+- Inject `Authorization: Bearer` in `request()`
+- On 401 → clear token, trigger `onAuthError` callback
+- Add `auth.login(username, password)` and `auth.logout()`
+
+### 7. `web/frontend/src/types/index.ts` — add `TokenResponse`
+
+### 8. `web/frontend/src/components/LoginPage.tsx` — **new** login form
+
+Centered card with username/password fields, dark SDR theme, error message on failure.
+
+### 9. `web/frontend/src/App.tsx` — auth gate
+
+- Track `token` state (init from localStorage)
+- No token → `<LoginPage>`, valid token → `<AppLayout>`
+- Pass `onLogout` to layout
+
+### 10. `web/frontend/src/components/layout/Header.tsx` — logout button
+
+Add LogOut icon button that clears token.
+
+### 11. `web/frontend/src/utils/strings.ts` — German auth strings
+
+### 12. WebSocket connections — pass `?token=` query param
+
+Update spectrum and events WebSocket URLs in Dashboard components.
+
+## Files
+
+| File | Action |
+|------|--------|
+| `web/backend/requirements.txt` | Add 3 packages |
+| `web/backend/config.py` | Add 4 auth settings |
+| `web/backend/auth.py` | **New** — auth utilities |
+| `web/backend/routers/auth.py` | **New** — login endpoint |
+| `web/backend/main.py` | Mount auth, protect routes + WS |
+| `web/frontend/src/api/client.ts` | Auth header, 401 handling |
+| `web/frontend/src/types/index.ts` | TokenResponse type |
+| `web/frontend/src/components/LoginPage.tsx` | **New** — login page |
+| `web/frontend/src/App.tsx` | Auth gate |
+| `web/frontend/src/components/layout/Header.tsx` | Logout button |
+| `web/frontend/src/utils/strings.ts` | Auth strings |
+| Dashboard WS components | Token in WS URL |
+
+## Verification
+
+1. `GET /api/v1/instances` without token → 401
+2. `POST /api/v1/auth/login` wrong password → 401
+3. `POST /api/v1/auth/login` correct → token returned
+4. `GET /api/v1/instances` with Bearer token → 200
+5. Frontend: no token → login page shown
+6. Login with `oe8yml` / `Kx8$mQ2vL#nR7wYp` → dashboard
+7. Logout → back to login
+8. WebSocket spectrum + events work after login
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/achildrenmile/.REDACTED.jsonl
+
+---
+
+commit this and deploy. also check, why the telegram notification is not working any more
+
+---
+
+user and password pls
+
+---
+
+ist der chat zum bot für alle die wollen freigegeben? falls nicht, wie mach ich das
+
+---
+
+option 1
+
+---
+
+hab den bot hinzugefügt und was geschrieben
+
+---
+
+ja
+
+---
+
+wie komm ich zum qr code der gruppe. und kann sich jeder hinzufügen
+
+---
+
+per default soll der container immer alle receiver starten. damit ist gewährleistet, dass man was hört
+
+---
+
+wenn ich zb alle wichtigen frequenzen im 2m band überwachen will auf jeden SDR. wie könnte das gehen?
+
+---
+
+B und nach der Implementierung, analysiere alle wichtigen Frequenzen. In der Message dann in den Kanälen ist es nötig zu sagen von welchem WebRX das stammt, damit man weiß, wo das Signal aufgenommen wurde. Füge zusätzlich noch das Maidenhead Grid für die WebRxen hinzu.
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the conversation:
+
+1. **Initial Request**: User asked to implement a detailed plan for adding login with fixed credentials to BandWacht web UI. The plan was comprehensive with 12 steps covering backend auth, frontend login page, JWT tokens, etc.
+
+2. **Implementation Phase**: I implemented the full auth system:
+   - Added packages to requirements.txt (passlib, python-jose, python-multipart)
+   - Added auth settings to config.py (username, bcrypt hash, JWT secret)
+   - Created web/backend/auth.py (verify_password, create_access_token, get_current_user, verify_ws_token)
+   - Created web/backend/routers/auth.py (login endpoint)
+   - Updated main.py (mount auth router, protect all routers with dependencies)
+   - Updated ws_bridge.py (WebSocket token validation via query param)
+   - Updated frontend client.ts (token management, auth headers, 401 handling)
+   - Updated types/index.ts (TokenResponse)
+   - Created LoginPage.tsx (login form)
+   - Updated App.tsx (auth gate)
+   - Updated AppLayout.tsx (pass onLogout)
+   - Updated Header.tsx (logout button)
+   - Updated useWebSocket.ts (token in WS URL)
+   - Updated strings.ts (German auth strings)
+
+3. **bcrypt hash generation**: Had to create a temp venv to generate the hash. Hit passlib/bcrypt 5.x incompatibility, pinned bcrypt to 4.0.1 for hash generation.
+
+4. **WebSocket auth issue**: Initially tried using a FastAPI Depends for WS token validation, but realized closing a WS before accept was problematic. Went through several iterations:
+   - First: Depends with websocket.close() before accept - problematic
+   - Second: WebSocketClose exception - not available
+   - Third: accept then close in dependency - conflicts with endpoint's accept()
+   - Final: Simple `verify_ws_token()` function called inline in WS endpoints before accept()
+
+5. **Commit and Deploy request**: User asked to "commit this and deploy. also check, why the telegram notification is not working any more"
+
+6. **Telegram investigation**: Spawned an Explore agent that found the root cause - commit 59fcdd2 moved notification config from DB to env vars but docker-compose.web.yml was never updated to forward BANDWACHT_NOTIFY_* variables into the container.
+
+7. **Telegram fix**: 
+   - Updated docker-compose.web.yml to pass all notification + auth env vars
+   - Updated deploy script to write .env on remote host
+   - Updated .env.production.example
+   - Recovered Telegram credentials from old SQLite DB on remote host (bot_token: 8781043639:REDACTED, chat_id: 816918979)
+
+8. **bcrypt 5.x error in production**: First deploy failed because passlib 1.7.4 is incompatible with bcrypt 5.0.0 (ValueError on 72-byte check). Fixed by pinning `bcrypt>=4.0,<5` in requirements.txt. Redeployed with --rebuild.
+
+9. **Verification**: All auth endpoints working, Telegram test notification sent successfully.
+
+10. **User asked for credentials**: Provided username `oe8yml` and password `Kx8$mQ2vL#nR7wYp`.
+
+11. **Telegram group question**: User asked about making the Telegram bot chat public. Explained the chat_id was a private chat, offered two options (group vs channel).
+
+12. **Group setup**: User chose Option 1 (group). Created "Bandwacht Alerts" group, added bot. I fetched the group chat_id (-5194575117) via Bot API, updated .env.production, redeployed, and verified test message sent to group.
+
+13. **Auto-start request**: User asked for all receivers to start automatically on container boot. Added `_autostart_instances()` function in main.py lifespan. Deployed and verified all 3 instances (OE8CNI, OE8YML, OE8CXC) auto-started.
+
+14. **Global targets question**: User asked about monitoring all important 2m band frequencies on every SDR. I proposed two options (Templates vs Global Targets).
+
+15. **User chose Option B (Global Targets)** and added requirements:
+    - Instance name in notification messages so people know which WebRX detected the signal
+    - Maidenhead grid for WebRX instances
+    - After implementation, analyze all important frequencies
+
+16. **Planning phase**: Entered plan mode. Launched 3 agents in parallel:
+    - Explore agent: DB models, CRUD, schemas, routers, frontend for targets
+    - Explore agent: Notification format, DetectionEvent, BandWacht core
+    - General-purpose agent: Research 2m band frequencies for OE, Maidenhead grids
+
+17. **User clarifications during planning**:
+    - "use direct frequencies... not repeaters"
+    - "also in ssb"
+    - "145.300-145.600" (FM simplex range)
+    - "and 144.300-(ssb frequencies)"
+    - "aprs do not" (exclude APRS)
+
+18. **Plan agent**: Designed comprehensive implementation plan covering all changes.
+
+19. **Final plan written**: Wrote the plan to the plan file with all user feedback incorporated. Was about to call ExitPlanMode when the summary was requested.
+
+Key files in the project:
+- bandwacht.py - Core BandWacht library with DetectionEvent, notification backends, BandWacht class
+- web/backend/models.py - SQLAlchemy models (SdrInstance, WatchTarget, DetectionEvent)
+- web/backend/schemas.py - Pydantic schemas
+- web/backend/crud.py - CRUD operations
+- web/backend/services/monitor_manager.py - MonitorManager, DatabaseNotifier, WebBandWacht
+- web/backend/main.py - FastAPI app entry point
+- web/backend/config.py - Settings via env vars
+- web/frontend/src/ - React + TypeScript frontend
+
+Current state: In plan mode with a complete plan for global targets + Maidenhead grid + instance info in notifications. The plan file has been written. Need to call ExitPlanMode for user approval.
+
+Summary:
+1. Primary Request and Intent:
+   The user's requests progressed through several phases:
+   - **Phase 1**: Implement JWT login with fixed credentials (username `oe8yml`, password `Kx8$mQ2vL#nR7wYp`) to protect the BandWacht web UI. This was completed and deployed.
+   - **Phase 2**: Commit, deploy, and investigate why Telegram notifications stopped working. Root cause found and fixed (docker-compose not forwarding env vars).
+   - **Phase 3**: Set up Telegram group "Bandwacht Alerts" (chat_id: `-5194575117`) for shared notifications instead of private chat.
+   - **Phase 4**: Auto-start all enabled SDR receiver instances on container boot.
+   - **Phase 5 (Current)**: Implement global targets (frequencies that apply to ALL SDR instances), add Maidenhead grid locator to instances, and include instance name + grid in notification messages. Seed default 2m band simplex frequencies. User specified: FM simplex 145.300-145.600, SSB from 144.300+, NO repeaters, NO APRS, include ISS.
+
+2. Key Technical Concepts:
+   - FastAPI + SQLAlchemy async + aiosqlite backend
+   - React + TypeScript + Vite + Tailwind frontend (custom SDR dark theme)
+   - JWT authentication with bcrypt password hashing (passlib + python-jose)
+   - WebSocket auth via `?token=` query parameter (not HTTP header)
+   - Docker deployment via `deploy-bandwacht-web.sh` → SSH to `host-node-01`
+   - Docker compose with `.env` file for secrets on remote host
+   - Environment variable-based configuration (BANDWACHT_* prefix via pydantic-settings)
+   - German UI strings centralized in `web/frontend/src/utils/strings.ts`
+   - Global targets concept: `instance_id = NULL` means target applies to all instances
+   - Maidenhead grid locator system for amateur radio station locations
+   - DetectionEvent dataclass enrichment pattern (DatabaseNotifier mutates event before other notifiers see it)
+
+3. Files and Code Sections:
+
+   - **`web/backend/requirements.txt`** — Auth packages added
+     ```
+     passlib[bcrypt]>=1.7.4
+     bcrypt>=4.0,<5
+     python-jose[cryptography]>=3.3.0
+     python-multipart>=0.0.9
+     ```
+
+   - **`web/backend/config.py`** — Auth settings added to Settings class
+     ```python
+     # Authentication
+     auth_username: str = "oe8yml"
+     auth_password_hash: str = "$2b$12$hD9Bu1eFl84XDR/IIofkT.o4YPwo11leMHe3vamW7.nwZMGuR2f5G"
+     auth_jwt_secret: str = "ffb6fd1d4976c9354a93ca92124b144cf217a54821b69dbf206040ba65f59a2a"
+     auth_jwt_expire_hours: int = 24
+     ```
+
+   - **`web/backend/auth.py`** — NEW file, JWT + bcrypt utilities
+     ```python
+     from passlib.hash import bcrypt
+     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+     def verify_password(plain, hashed) -> bool
+     def create_access_token(subject) -> str
+     async def get_current_user(token) -> str  # FastAPI Depends
+     def verify_ws_token(token) -> str | None  # For WebSocket validation
+     ```
+
+   - **`web/backend/routers/auth.py`** — NEW file, login endpoint
+     ```python
+     @router.post("/auth/login")
+     async def login(form: OAuth2PasswordRequestForm = Depends()):
+         # validates against settings.auth_username + auth_password_hash
+         # returns {"access_token": ..., "token_type": "bearer"}
+     ```
+
+   - **`web/backend/main.py`** — Auth wiring + auto-start
+     - Auth router mounted publicly, all other routers protected via `dependencies=[Depends(get_current_user)]`
+     - Health endpoint remains public
+     - `_autostart_instances()` function starts all enabled instances on boot
+     - Lifespan: `init_db()` → `_autostart_instances()` → yield → `manager.stop_all()`
+
+   - **`web/backend/services/ws_bridge.py`** — WebSocket token validation
+     ```python
+     @router.websocket("/ws/spectrum/{instance_id}")
+     async def ws_spectrum(websocket: WebSocket, instance_id: int, token: str = Query(default="")):
+         user = verify_ws_token(token)
+         if not user:
+             await websocket.close(code=1008, reason="Nicht autorisiert")
+             return
+         await websocket.accept()
+         # ... rest unchanged
+     ```
+
+   - **`web/frontend/src/api/client.ts`** — Auth header injection, token management
+     - `getToken()`/`setToken()`/`clearToken()` using localStorage key `bandwacht_token`
+     - `request()` injects `Authorization: Bearer` header, handles 401 → clearToken + onAuthError
+     - `auth.login()` sends URL-encoded form data, `auth.logout()` clears token
+
+   - **`web/frontend/src/components/LoginPage.tsx`** — NEW file, centered login card
+
+   - **`web/frontend/src/App.tsx`** — Auth gate: no token → LoginPage, token → AppLayout
+
+   - **`web/frontend/src/components/layout/Header.tsx`** — Added LogOut button
+
+   - **`web/frontend/src/components/layout/AppLayout.tsx`** — Added `onLogout` prop passthrough
+
+   - **`web/frontend/src/hooks/useWebSocket.ts`** — Appends `?token=` to WS URLs
+     ```typescript
+     const token = getToken()
+     const sep = base.includes('?') ? '&' : '?'
+     const wsUrl = token ? `${base}${sep}token=${encodeURIComponent(token)}` : base
+     ```
+
+   - **`web/frontend/src/types/index.ts`** — Added TokenResponse interface
+
+   - **`web/frontend/src/utils/strings.ts`** — Added German auth strings (auth_login, auth_username, auth_password, auth_login_title, auth_logout, auth_error)
+
+   - **`docker-compose.web.yml`** — Added notification + auth env vars forwarding
+     ```yaml
+     - BANDWACHT_NOTIFY_TELEGRAM_BOT_TOKEN=${BANDWACHT_NOTIFY_TELEGRAM_BOT_TOKEN:-}
+     - BANDWACHT_NOTIFY_TELEGRAM_CHAT_ID=${BANDWACHT_NOTIFY_TELEGRAM_CHAT_ID:-}
+     # ... all other BANDWACHT_NOTIFY_* and BANDWACHT_AUTH_JWT_SECRET
+     ```
+
+   - **`deploy-bandwacht-web.sh`** — Added Step 1b to write `.env` on remote host from `.env.production` values
+
+   - **`.env.production`** (gitignored) — Contains deploy config + Telegram credentials
+     ```
+     REDACTED:REDACTED
+     BANDWACHT_NOTIFY_TELEGRAM_CHAT_ID=-5194575117
+     ```
+
+   - **`web/backend/services/monitor_manager.py`** — Key file for upcoming changes. Currently:
+     - `start_instance()` loads targets via `crud.get_targets(db, instance_id=instance_id)` — only instance-specific
+     - `DatabaseNotifier` has `instance_id` but NOT `instance_name` or `instance_grid`
+     - Notification message format does NOT include which WebRX detected the signal
+
+   - **`bandwacht.py`** — Core library. `DetectionEvent` dataclass currently has: timestamp, freq_hz, peak_db, bandwidth_hz, duration_s, target_label, recording_file. NO instance_name/instance_grid. `TelegramNotification.send()` formats: emoji + label + freq + peak + time. NO instance info.
+
+   - **`web/backend/models.py`** — SdrInstance has NO grid_locator field. WatchTarget has `instance_id` as NOT NULL FK.
+
+4. Errors and Fixes:
+   - **No pip/pip3 in environment**: Created temp venv `/tmp/hashenv` to generate bcrypt hash
+   - **passlib + bcrypt 5.x incompatibility (hash generation)**: Pinned bcrypt==4.0.1 in temp venv for hash generation
+   - **WebSocket auth dependency approach**: Went through 4 iterations. Final approach: simple `verify_ws_token()` function called inline in WS endpoint body before `websocket.accept()`, returning None on failure. This avoids the complexity of Dependencies that try to close unaccepted WebSockets.
+   - **passlib + bcrypt 5.x in production container**: First deploy of auth failed with `ValueError: password cannot be longer than 72 bytes`. Fixed by adding `bcrypt>=4.0,<5` pin to requirements.txt and redeploying with `--rebuild`.
+   - **Telegram notifications broken**: Root cause was commit 59fcdd2 moved config from DB to env vars but docker-compose.web.yml was never updated to forward `BANDWACHT_NOTIFY_*` vars. Fixed by updating docker-compose.web.yml, deploy script, and recovering credentials from the old SQLite DB.
+   - **Docker cache not invalidating pip install**: Used `--rebuild` flag which passes `--no-cache` to docker build, but Docker still cached some layers. The bcrypt version ended up being 4.3.0 (correct) because the requirements.txt content change forced the pip install layer to rebuild.
+
+5. Problem Solving:
+   - Auth system fully implemented and deployed (3 commits: auth, telegram fix, bcrypt pin)
+   - Telegram notifications restored and redirected to group chat
+   - Auto-start of all SDR instances on container boot implemented and verified (3 instances: OE8CNI, OE8YML, OE8CXC all auto-start)
+   - Currently in planning phase for global targets feature
+
+6. All User Messages:
+   - "Implement the following plan: [detailed auth plan with 12 steps]"
+   - "commit this and deploy. also check, why the telegram notification is not working any more"
+   - "user and password pls"
+   - "ist der chat zum bot für alle die wollen freigegeben? falls nicht, wie mach ich das"
+   - "option 1" (chose Telegram group)
+   - "hab den bot hinzugefügt und was geschrieben" (added bot to group and sent message)
+   - "ja" (confirmed test message received in group)
+   - "per default soll der container immer alle receiver starten. damit ist gewährleistet, dass man was hört"
+   - "wenn ich zb alle wichtigen frequenzen im 2m band überwachen will auf jeden SDR. wie könnte das gehen?"
+   - "B und nach der Implementierung, analysiere alle wichtigen Frequenzen. In der Message dann in den Kanälen ist es nötig zu sagen von welchem WebRX das stammt, damit man weiß, wo das Signal aufgenommen wurde. Füge zusätzlich noch das Maidenhead Grid für die WebRxen hinzu."
+   - "use direct frequencies... not repeaters"
+   - "also in ssb"
+   - "145.300-145.600"
+   - "and 144.300-(ssb frequencies)"
+   - "aprs do not"
+
+7. Pending Tasks:
+   - **Implement the global targets plan** (currently in plan mode, plan written, awaiting approval via ExitPlanMode):
+     - Make WatchTarget.instance_id nullable (NULL = global, applies to all instances)
+     - Add grid_locator field to SdrInstance model
+     - Add instance_name + instance_grid to DetectionEvent and all notification backends
+     - Seed 17 default 2m simplex frequencies as global targets on first startup
+     - Update frontend to support global targets and show grid locators
+     - Create DB migration script
+     - Deploy everything
+
+8. Current Work:
+   I am in **plan mode**, having just written the final plan file at `/home/achildrenmile/.claude/plans/mighty-chasing-dawn.md`. The plan covers:
+   - Global targets (nullable instance_id)
+   - Maidenhead grid on SdrInstance
+   - Instance name + grid in notification messages (Telegram, Console, etc.)
+   - Seeding 17 default 2m simplex frequencies (FM 145.300-145.600, SSB 144.050-144.370, ISS 145.800, NO APRS, NO repeaters)
+   - DB migration script for SQLite
+   - Frontend updates for global target UI + grid locator display
+   
+   The plan was about to be submitted for user approval via ExitPlanMode.
+
+9. Optional Next Step:
+   Call `ExitPlanMode` to present the plan for user approval, then implement all changes described in the plan. The user's most recent substantive request was: "B und nach der Implementierung, analysiere alle wichtigen Frequenzen. In der Message dann in den Kanälen ist es nötig zu sagen von welchem WebRX das stammt, damit man weiß, wo das Signal aufgenommen wurde. Füge zusätzlich noch das Maidenhead Grid für die WebRxen hinzu." with clarifications: "use direct frequencies... not repeaters", "also in ssb", "145.300-145.600", "and 144.300-(ssb frequencies)", "aprs do not".
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/achildrenmile/.REDACTED.jsonl
+Please continue the conversation from where we left it off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+---
+
+[Request interrupted by user for tool use]

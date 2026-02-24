@@ -1,0 +1,43 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "9abbc503ffed",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    ".env.production",
+    ".env.production.example",
+    "deploy-bandwacht-web.sh",
+    "docker-compose.web.yml",
+    "web/backend/auth.py",
+    "web/backend/config.py",
+    "web/backend/main.py",
+    "web/backend/requirements.txt",
+    "web/backend/routers/auth.py",
+    "web/backend/services/ws_bridge.py",
+    "web/frontend/src/App.tsx",
+    "web/frontend/src/api/client.ts",
+    "web/frontend/src/components/LoginPage.tsx",
+    "web/frontend/src/components/layout/AppLayout.tsx",
+    "web/frontend/src/components/layout/Header.tsx",
+    "web/frontend/src/hooks/useWebSocket.ts",
+    "web/frontend/src/types/index.ts",
+    "web/frontend/src/utils/strings.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/9a/bbc503ffed/0/metadata.json",
+      "transcript": "/9a/bbc503ffed/0/full.jsonl",
+      "context": "/9a/bbc503ffed/0/context.md",
+      "content_hash": "/9a/bbc503ffed/0/content_hash.txt",
+      "prompt": "/9a/bbc503ffed/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 19,
+    "cache_creation_tokens": 158841,
+    "cache_read_tokens": 1058329,
+    "output_tokens": 4308,
+    "api_call_count": 9
+  }
+}
