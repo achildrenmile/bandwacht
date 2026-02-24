@@ -1,0 +1,138 @@
+Implement the following plan:
+
+# Plan: Add Login with Fixed Credentials
+
+## Context
+
+The BandWacht web UI is currently completely open — no authentication. Add a single fixed login (username `oe8yml`, random hard password) to protect the tool. No user DB table needed — credentials checked against bcrypt hash, JWT token issued on login.
+
+## Password
+
+`Kx8$mQ2vL#nR7wYp`
+
+## Changes
+
+### 1. `web/backend/requirements.txt` — add auth packages
+
+```
+passlib[bcrypt]>=1.7.4
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.9
+```
+
+### 2. `web/backend/config.py` — add auth settings
+
+```python
+auth_username: str = "oe8yml"
+auth_password_hash: str = "<bcrypt hash>"
+auth_jwt_secret: str = "<random hex>"
+auth_jwt_expire_hours: int = 24
+```
+
+### 3. `web/backend/auth.py` — **new** JWT + bcrypt utilities
+
+- `verify_password(plain, hashed)` — bcrypt verify
+- `create_access_token(subject)` — sign JWT with expiry
+- `get_current_user` — FastAPI `Depends()` that validates `Authorization: Bearer` header, raises 401 on failure
+
+### 4. `web/backend/routers/auth.py` — **new** login endpoint
+
+- `POST /auth/login` — accepts `OAuth2PasswordRequestForm`, checks username + bcrypt hash, returns `{"access_token": "...", "token_type": "bearer"}`
+
+### 5. `web/backend/main.py` — wire auth
+
+- Mount auth router (public)
+- Add `get_current_user` dependency to all protected routers (instances, targets, events, recordings, notifications, settings)
+- Protect WebSocket endpoints: extract token from `?token=` query param
+
+### 6. `web/frontend/src/api/client.ts` — auth header + 401 handling
+
+- Add `getToken()` / `setToken()` / `clearToken()` using localStorage
+- Inject `Authorization: Bearer` in `request()`
+- On 401 → clear token, trigger `onAuthError` callback
+- Add `auth.login(username, password)` and `auth.logout()`
+
+### 7. `web/frontend/src/types/index.ts` — add `TokenResponse`
+
+### 8. `web/frontend/src/components/LoginPage.tsx` — **new** login form
+
+Centered card with username/password fields, dark SDR theme, error message on failure.
+
+### 9. `web/frontend/src/App.tsx` — auth gate
+
+- Track `token` state (init from localStorage)
+- No token → `<LoginPage>`, valid token → `<AppLayout>`
+- Pass `onLogout` to layout
+
+### 10. `web/frontend/src/components/layout/Header.tsx` — logout button
+
+Add LogOut icon button that clears token.
+
+### 11. `web/frontend/src/utils/strings.ts` — German auth strings
+
+### 12. WebSocket connections — pass `?token=` query param
+
+Update spectrum and events WebSocket URLs in Dashboard components.
+
+## Files
+
+| File | Action |
+|------|--------|
+| `web/backend/requirements.txt` | Add 3 packages |
+| `web/backend/config.py` | Add 4 auth settings |
+| `web/backend/auth.py` | **New** — auth utilities |
+| `web/backend/routers/auth.py` | **New** — login endpoint |
+| `web/backend/main.py` | Mount auth, protect routes + WS |
+| `web/frontend/src/api/client.ts` | Auth header, 401 handling |
+| `web/frontend/src/types/index.ts` | TokenResponse type |
+| `web/frontend/src/components/LoginPage.tsx` | **New** — login page |
+| `web/frontend/src/App.tsx` | Auth gate |
+| `web/frontend/src/components/layout/Header.tsx` | Logout button |
+| `web/frontend/src/utils/strings.ts` | Auth strings |
+| Dashboard WS components | Token in WS URL |
+
+## Verification
+
+1. `GET /api/v1/instances` without token → 401
+2. `POST /api/v1/auth/login` wrong password → 401
+3. `POST /api/v1/auth/login` correct → token returned
+4. `GET /api/v1/instances` with Bearer token → 200
+5. Frontend: no token → login page shown
+6. Login with `oe8yml` / `Kx8$mQ2vL#nR7wYp` → dashboard
+7. Logout → back to login
+8. WebSocket spectrum + events work after login
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/achildrenmile/.REDACTED.jsonl
+
+---
+
+commit this and deploy. also check, why the telegram notification is not working any more
+
+---
+
+user and password pls
+
+---
+
+ist der chat zum bot für alle die wollen freigegeben? falls nicht, wie mach ich das
+
+---
+
+option 1
+
+---
+
+hab den bot hinzugefügt und was geschrieben
+
+---
+
+ja
+
+---
+
+wie komm ich zum qr code der gruppe. und kann sich jeder hinzufügen
+
+---
+
+per default soll der container immer alle receiver starten. damit ist gewährleistet, dass man was hört
