@@ -1,0 +1,38 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "7b675bbcf5c5",
+  "session_id": "9debb5bf-5624-47a4-937e-28a8fd569b7c",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-24T08:02:30.567847547Z",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "web/backend/config.py",
+    "web/backend/crud.py",
+    "web/backend/routers/notifications.py",
+    "web/backend/schemas.py",
+    "web/backend/services/monitor_manager.py",
+    "web/frontend/src/api/client.ts",
+    "web/frontend/src/components/config/NotificationConfig.tsx",
+    "web/frontend/src/types/index.ts"
+  ],
+  "agent": "Claude Code",
+  "checkpoint_transcript_start": 273,
+  "transcript_lines_at_start": 273,
+  "token_usage": {
+    "input_tokens": 8,
+    "cache_creation_tokens": 11778,
+    "cache_read_tokens": 490333,
+    "output_tokens": 3106,
+    "api_call_count": 6
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-24T08:02:30.423638192Z",
+    "agent_lines": 65,
+    "human_added": 236,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 301,
+    "agent_percentage": 21.59468438538206
+  }
+}

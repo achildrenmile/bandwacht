@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "7b675bbcf5c5",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "web/backend/config.py",
+    "web/backend/crud.py",
+    "web/backend/routers/notifications.py",
+    "web/backend/schemas.py",
+    "web/backend/services/monitor_manager.py",
+    "web/frontend/src/api/client.ts",
+    "web/frontend/src/components/config/NotificationConfig.tsx",
+    "web/frontend/src/types/index.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/7b/675bbcf5c5/0/metadata.json",
+      "transcript": "/7b/675bbcf5c5/0/full.jsonl",
+      "context": "/7b/675bbcf5c5/0/context.md",
+      "content_hash": "/7b/675bbcf5c5/0/content_hash.txt",
+      "prompt": "/7b/675bbcf5c5/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 8,
+    "cache_creation_tokens": 11778,
+    "cache_read_tokens": 490333,
+    "output_tokens": 3106,
+    "api_call_count": 6
+  }
+}
