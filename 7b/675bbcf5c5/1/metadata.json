@@ -1,0 +1,46 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "7b675bbcf5c5",
+  "session_id": "c67bd7de-0cec-4aa6-959e-5315006f65c8",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-24T08:44:24.774897608Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".env.production",
+    ".env.production.example",
+    "deploy-bandwacht-web.sh",
+    "docker-compose.web.yml",
+    "web/backend/auth.py",
+    "web/backend/config.py",
+    "web/backend/main.py",
+    "web/backend/requirements.txt",
+    "web/backend/routers/auth.py",
+    "web/backend/services/ws_bridge.py",
+    "web/frontend/src/App.tsx",
+    "web/frontend/src/api/client.ts",
+    "web/frontend/src/components/LoginPage.tsx",
+    "web/frontend/src/components/layout/AppLayout.tsx",
+    "web/frontend/src/components/layout/Header.tsx",
+    "web/frontend/src/hooks/useWebSocket.ts",
+    "web/frontend/src/types/index.ts",
+    "web/frontend/src/utils/strings.ts"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 92,
+    "cache_creation_tokens": 147333,
+    "cache_read_tokens": 5563848,
+    "output_tokens": 6985,
+    "api_call_count": 88
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-24T08:44:24.452895424Z",
+    "agent_lines": 334,
+    "human_added": 20,
+    "human_modified": 10,
+    "human_removed": 0,
+    "total_committed": 364,
+    "agent_percentage": 91.75824175824175
+  }
+}
