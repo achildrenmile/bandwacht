@@ -1,0 +1,139 @@
+Implement the following plan:
+
+# Plan: Global Targets, Maidenhead Grid, Instance in Notifications
+
+## Context
+
+Targets are currently per-instance — to monitor the same frequency on 3 SDRs you need 3 targets. This adds global targets (`instance_id = NULL`) that apply to all instances automatically. Also adds Maidenhead grid to SDR instances and includes instance name + grid in Telegram/console notifications so users know *where* a signal was detected.
+
+## Frequencies to seed (direct simplex only, no repeaters, no APRS)
+
+**FM simplex 145.300–145.600 MHz** (12.5 kHz BW):
+- 145.300 S12, 145.337 S13, 145.375 DV Anruf, 145.400 S16, 145.450 S18, 145.475 S19, 145.500 FM Anruf, 145.525 S21, 145.550 S22, 145.575 S23, 145.600 S24
+
+**SSB/weak-signal 144.050–144.400 MHz** (3 kHz BW):
+- 144.050 CW Anruf, 144.100 CW Meteorscatter, 144.174 FT8, 144.300 SSB Anruf, 144.370 MSK144
+
+**Special** (12.5 kHz BW):
+- 145.800 ISS Downlink
+
+## Changes
+
+### 1. `bandwacht.py` — DetectionEvent + notification backends
+
+Add two fields to DetectionEvent (backwards-compat defaults):
+```python
+instance_name: str = ""
+instance_grid: str = ""
+```
+
+Update `TelegramNotification.send()` — add line `Empfänger: OE8CNI (JN66UO)` when set.
+Update `ConsoleNotification.send()` — append `@ OE8CNI (JN66UO)`.
+Same pattern for Gotify, Ntfy, Webhook.
+
+### 2. `web/backend/models.py` — schema changes
+
+- `SdrInstance`: add `grid_locator: Mapped[str | None] = mapped_column(String(10), nullable=True)`
+- `WatchTarget`: change `instance_id` from NOT NULL to **nullable** (`Mapped[int | None]`), update relationship to `Mapped["SdrInstance | None"]`
+- `SdrInstance.targets` relationship: change cascade from `"all, delete-orphan"` to `"all"` (delete-orphan conflicts with nullable FK; DB-level ON DELETE CASCADE still handles cleanup)
+
+### 3. `web/backend/schemas.py`
+
+- `InstanceBase` + `InstanceUpdate` + `InstanceRead`: add `grid_locator: str | None = None`
+- `TargetBase`: change `instance_id: int` → `instance_id: int | None = None`
+
+### 4. `web/backend/crud.py` — new queries + seed
+
+- `get_global_targets(db)` — WHERE instance_id IS NULL
+- `get_targets_for_instance(db, instance_id)` — WHERE instance_id = ? OR instance_id IS NULL
+- `seed_global_targets(db)` — insert default 2m frequencies if no global targets exist
+
+### 5. `web/backend/routers/targets.py`
+
+- `create_target`: skip instance validation when `instance_id is None`
+
+### 6. `web/backend/services/monitor_manager.py`
+
+- `start_instance`: use `crud.get_targets_for_instance()` instead of `crud.get_targets(db, instance_id=...)`
+- `DatabaseNotifier.__init__`: accept `instance_name`, `instance_grid`; set them on event in `send()` before other notifiers run
+- `_broadcast_event`: include `instance_name` + `instance_grid` in WS payload
+- `test_notification`: add instance_name/grid to test event
+
+### 7. `web/backend/main.py` — seed on startup
+
+Call `crud.seed_global_targets()` after `init_db()`, before auto-start.
+
+### 8. DB migration (run inside container)
+
+Python script `migrate_v2_global_targets.py`:
+- `ALTER TABLE sdr_instances ADD COLUMN grid_locator VARCHAR(10)`
+- Recreate `watch_targets` with nullable `instance_id` (SQLite can't ALTER COLUMN)
+- Set known grids: OE8CNI→JN66UO, OE8YML→JN66TO, OE8CXC→JN66SS
+
+Run via `docker exec bandwacht-web python3 migrate_v2_global_targets.py` before restarting.
+
+### 9. Frontend — types + API client
+
+- `SdrInstance`: add `grid_locator: string | null`
+- `WatchTarget`: change `instance_id: number` → `instance_id: number | null`
+- `targets.create` data: `instance_id: number | null`
+
+### 10. Frontend — InstanceForm.tsx + InstanceList.tsx
+
+- InstanceForm: add grid_locator input field after URL
+- InstanceList: show `[JN66TO]` next to instance URL
+
+### 11. Frontend — TargetForm.tsx + TargetList.tsx
+
+- TargetForm: instance dropdown gets `"Global (alle Instanzen)"` option (value `null`)
+- TargetList: show "Global" for targets with `instance_id === null`
+
+### 12. Frontend — EventFeed.tsx + Dashboard.tsx
+
+- LiveEvent type: add `instance_name?`, `instance_grid?`
+- EventFeed: show `@ OE8CNI (JN66UO)` per event
+
+### 13. `web/frontend/src/utils/strings.ts` — new strings
+
+```
+cfg_grid_locator: 'Maidenhead-Locator'
+cfg_global_target: 'Global (alle Instanzen)'
+```
+
+## Files
+
+| File | Action |
+|------|--------|
+| `bandwacht.py` | Add fields to DetectionEvent, update 5 notification backends |
+| `web/backend/models.py` | Nullable instance_id, add grid_locator |
+| `web/backend/schemas.py` | Update Instance + Target schemas |
+| `web/backend/crud.py` | New queries + seed function |
+| `web/backend/routers/targets.py` | Allow null instance_id |
+| `web/backend/services/monitor_manager.py` | Global targets loading, event enrichment |
+| `web/backend/main.py` | Seed on startup |
+| `migrate_v2_global_targets.py` | **New** — DB migration script |
+| `web/frontend/src/types/index.ts` | grid_locator, nullable instance_id |
+| `web/frontend/src/api/client.ts` | nullable instance_id in create |
+| `web/frontend/src/utils/strings.ts` | New German strings |
+| `web/frontend/src/components/config/InstanceForm.tsx` | Grid locator field |
+| `web/frontend/src/components/config/InstanceList.tsx` | Show grid |
+| `web/frontend/src/components/config/TargetForm.tsx` | Global option in dropdown |
+| `web/frontend/src/components/config/TargetList.tsx` | Show "Global" label |
+| `web/frontend/src/components/dashboard/EventFeed.tsx` | Instance name in events |
+| `web/frontend/src/components/dashboard/Dashboard.tsx` | LiveEvent type update |
+
+## Verification
+
+1. Start container → 17 global targets auto-seeded in DB
+2. All 3 instances auto-start and monitor all global targets
+3. Trigger detection → Telegram message includes `Empfänger: OE8CNI (JN66UO)`
+4. Frontend: config page shows global targets with "Global" badge
+5. Frontend: new target form allows selecting "Global (alle Instanzen)"
+6. Frontend: live event feed shows instance name per event
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/achildrenmile/.REDACTED.jsonl
+
+---
+
+have you deployed and activated?

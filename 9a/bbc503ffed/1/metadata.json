@@ -1,29 +1,22 @@
 {
   "cli_version": "0.4.2",
   "checkpoint_id": "9abbc503ffed",
+  "session_id": "c07c318a-714f-426b-913b-221c8e7bc899",
   "strategy": "manual-commit",
+  "created_at": "2026-02-24T14:10:19.069297737Z",
   "branch": "main",
   "checkpoints_count": 1,
   "files_touched": [
-    ".env.production",
-    ".env.production.example",
     "__pycache__/bandwacht.cpython-312.pyc",
     "__pycache__/migrate_v2_global_targets.cpython-312.pyc",
     "bandwacht.py",
-    "deploy-bandwacht-web.sh",
-    "docker-compose.web.yml",
     "migrate_v2_global_targets.py",
-    "web/backend/auth.py",
-    "web/backend/config.py",
     "web/backend/crud.py",
     "web/backend/main.py",
     "web/backend/models.py",
-    "web/backend/requirements.txt",
-    "web/backend/routers/auth.py",
     "web/backend/routers/targets.py",
     "web/backend/schemas.py",
     "web/backend/services/monitor_manager.py",
-    "web/backend/services/ws_bridge.py",
     "web/frontend/node_modules/.bin/autoprefixer",
     "web/frontend/node_modules/.bin/baseline-browser-mapping",
     "web/frontend/node_modules/.bin/browserslist",
@@ -9951,42 +9944,31 @@
     "web/frontend/node_modules/yallist/package.json",
     "web/frontend/node_modules/yallist/yallist.js",
     "web/frontend/package-lock.json",
-    "web/frontend/src/App.tsx",
     "web/frontend/src/api/client.ts",
-    "web/frontend/src/components/LoginPage.tsx",
     "web/frontend/src/components/config/InstanceForm.tsx",
     "web/frontend/src/components/config/InstanceList.tsx",
     "web/frontend/src/components/config/TargetForm.tsx",
     "web/frontend/src/components/config/TargetList.tsx",
     "web/frontend/src/components/dashboard/Dashboard.tsx",
     "web/frontend/src/components/dashboard/EventFeed.tsx",
-    "web/frontend/src/components/layout/AppLayout.tsx",
-    "web/frontend/src/components/layout/Header.tsx",
-    "web/frontend/src/hooks/useWebSocket.ts",
     "web/frontend/src/types/index.ts",
     "web/frontend/src/utils/strings.ts"
   ],
-  "sessions": [
-    {
-      "metadata": "/9a/bbc503ffed/0/metadata.json",
-      "transcript": "/9a/bbc503ffed/0/full.jsonl",
-      "context": "/9a/bbc503ffed/0/context.md",
-      "content_hash": "/9a/bbc503ffed/0/content_hash.txt",
-      "prompt": "/9a/bbc503ffed/0/prompt.txt"
-    },
-    {
-      "metadata": "/9a/bbc503ffed/1/metadata.json",
-      "transcript": "/9a/bbc503ffed/1/full.jsonl",
-      "context": "/9a/bbc503ffed/1/context.md",
-      "content_hash": "/9a/bbc503ffed/1/content_hash.txt",
-      "prompt": "/9a/bbc503ffed/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
   "token_usage": {
-    "input_tokens": 242,
-    "cache_creation_tokens": 324068,
-    "cache_read_tokens": 7116961,
-    "output_tokens": 8942,
-    "api_call_count": 81
+    "input_tokens": 223,
+    "cache_creation_tokens": 165227,
+    "cache_read_tokens": 6058632,
+    "output_tokens": 4634,
+    "api_call_count": 72
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-24T14:10:18.542546084Z",
+    "agent_lines": 259,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 1556391,
+    "total_committed": 259,
+    "agent_percentage": 100
   }
 }
