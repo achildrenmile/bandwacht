@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "adc2886d375c",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "LICENSE",
+    "README.md",
+    "bandwacht.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ad/c2886d375c/0/metadata.json",
+      "transcript": "/ad/c2886d375c/0/full.jsonl",
+      "context": "/ad/c2886d375c/0/context.md",
+      "content_hash": "/ad/c2886d375c/0/content_hash.txt",
+      "prompt": "/ad/c2886d375c/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 67,
+    "cache_creation_tokens": 113888,
+    "cache_read_tokens": 2586699,
+    "output_tokens": 4352,
+    "api_call_count": 50
+  }
+}

@@ -1,0 +1,41 @@
+init repo and create a public repo with mit license
+
+---
+
+entire enable
+
+---
+
+execute command entire enable
+
+---
+
+schnelltest for https://oe8cxc.webrx.at/
+
+---
+
+kann bandwacht auch auf das band umschalten? wenn der webrx zb auf 80m steht auf 2m zurück und dann hören
+
+---
+
+[Request interrupted by user for tool use]
+
+---
+
+does the python script for command line still exist
+
+---
+
+cann ich das auch auf der command line ausführen
+
+---
+
+ist alles was das tool kann dokumentiert, wenn nicht machen
+
+---
+
+for the notification agents, like telegram. remove the settings from the web interface and move it to environment vars.
+
+---
+
+[Request interrupted by user for tool use]
